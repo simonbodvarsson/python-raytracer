@@ -11,11 +11,10 @@ class Vec3:
         self.z = self.vec[2]
 
     def length(self):
-        return self.length_squared**(0.5)
+        return self.length_squared()**(0.5)
 
     def length_squared(self):
         return self.x**2 + self.y**2 + self.z**2
-
 
     # Overload operators +, -, [], +=, -=, *=, /=
 

@@ -14,6 +14,18 @@ class TestVec3(unittest.TestCase):
         self.assertEqual(v1.y, 2)
         self.assertEqual(v1.z, 3)
 
+    def test_length(self):
+        v1 = Vec3(1,2,3)
+        v2 = Vec3(-2.0, 0, 3)
+        v3 = Vec3(3.14, -212, 21)
+        self.assertAlmostEqual(v1.length(), 14**0.5)
+        self.assertAlmostEqual(v1.length_squared(), v1.length()**2)
+        self.assertAlmostEqual(v2.length(), 13**0.5)
+        self.assertAlmostEqual(v2.length_squared(), v2.length()**2)
+        self.assertAlmostEqual(v3.length(), 213.060694639)
+        self.assertAlmostEqual(v3.length_squared(), v3.length()**2)
+        
+
     def test_add(self):
         v1 = Vec3(1,2,3)
         v2 = Vec3(-2.0, 0, 3)
