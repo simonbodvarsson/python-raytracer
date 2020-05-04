@@ -16,3 +16,4 @@ Write a simple ray tracer in Python which can be improved and expanded upon.
 - File parser: Support importing files with more complicated objects
 - Support different textures: Glossy, matte etc.
 - View in browser as a web-app
+- Planet/Terrain procedural generation
