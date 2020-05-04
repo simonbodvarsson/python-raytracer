@@ -16,15 +16,40 @@ class Vec3:
     def length_squared(self):
         return self.x**2 + self.y**2 + self.z**2
 
+    def dot(self, v):
+        return self.x * v.x + self.y * v.y + self.z * v.z
+
+    def cross(self, v):
+        coord = (self.y * v.z - self.z * v.y,
+                 self.z * v.x - self.x * v.z,
+                 self.x * v.y - self.y * v.x)
+        return Vec3(*coord) 
+
+    # Returns a unit vector in direction of this vector
+    def unit_vector(self):
+        return self / self.length()
+
     # Overload operators +, -, [], +=, -=, *=, /=
 
-    # Sum vectors
+    # Sum vectors or add constant to vector
     def __add__(self, other):
+        # If argument is not of type Vec3, try adding it to each coordinate
+        if not isinstance(other, Vec3):
+            return Vec3(self.x + other, self.y + other, self.z + other)
         return Vec3(self.x+other.x, self.y+other.y, self.z+other.z)
 
     # Subtract vectors
     def __sub__(self, other):
+        # If argument is not of type Vec3, try subtracting it from each coordinate
+        if not isinstance(other, Vec3):
+            return Vec3(self.x - other, self.y - other, self.z - other)
         return Vec3(self.x-other.x, self.y-other.y, self.z-other.z)
+
+    def __mul__(self, t):
+        return Vec3(self.x * t, self.y * t, self.z * t)
+
+    def __truediv__(self, t):
+        return Vec3(self.x / t, self.y / t, self.z / t)
 
     # Negate vector
     def __neg__(self):
@@ -34,15 +59,22 @@ class Vec3:
     def __getitem__(self, index):
         return self.vec[index]
     
-    # Add a vector to this vector (override +=)
+    # Add a vector or constant to this vector (override +=)
     def __iadd__(self, other):
-        self.vec = (self.x+other.x, self.y+other.y, self.z+other.z)
+        # If argument is not of type Vec3, try adding it to each coordinate
+        if not isinstance(other, Vec3):
+            self.vec = (self.x+other, self.y+other, self.z+other)
+        else:
+            self.vec = (self.x+other.x, self.y+other.y, self.z+other.z)
         self.__update_coordinates__()
         return self
 
-    # Subtract a vector from this vector (override -=)
+    # Subtract a vector or constant from this vector (override -=)
     def __isub__(self, other):
-        self.vec = (self.x-other.x, self.y-other.y, self.z-other.z)
+        if not isinstance(other, Vec3):
+            self.vec = (self.x-other, self.y-other, self.z-other)
+        else:
+            self.vec = (self.x-other.x, self.y-other.y, self.z-other.z)
         self.__update_coordinates__()
         return self
 
@@ -59,6 +91,9 @@ class Vec3:
         self.vec = (self.x / t, self.y / t, self.z / t)
         self.__update_coordinates__()
         return self
+
+    def __eq__(self, other):
+        return self.vec == other.vec
     
     # Overload str()
     def __str__(self):
