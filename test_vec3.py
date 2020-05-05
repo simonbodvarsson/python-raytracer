@@ -82,6 +82,7 @@ class TestVec3(unittest.TestCase):
         self.assertAlmostEqual((v2+(-3.2))[1], -3.2)
         self.assertAlmostEqual((v2+(-3.2))[2], -0.2)
 
+
     def test_sub(self):
         v1 = Vec3(1,2,3)
         v2 = Vec3(-2.0, 0, 3)

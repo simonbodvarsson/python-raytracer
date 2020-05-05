@@ -16,9 +16,11 @@ class Vec3:
     def length_squared(self):
         return self.x**2 + self.y**2 + self.z**2
 
+    # Return the dot product of this vector and vector v
     def dot(self, v):
         return self.x * v.x + self.y * v.y + self.z * v.z
 
+    # Return the cross product of this vector and vector v
     def cross(self, v):
         coord = (self.y * v.z - self.z * v.y,
                  self.z * v.x - self.x * v.z,
@@ -38,6 +40,9 @@ class Vec3:
             return Vec3(self.x + other, self.y + other, self.z + other)
         return Vec3(self.x+other.x, self.y+other.y, self.z+other.z)
 
+    # Adding is commutative
+    __radd__ = __add__
+
     # Subtract vectors
     def __sub__(self, other):
         # If argument is not of type Vec3, try subtracting it from each coordinate
@@ -45,9 +50,14 @@ class Vec3:
             return Vec3(self.x - other, self.y - other, self.z - other)
         return Vec3(self.x-other.x, self.y-other.y, self.z-other.z)
 
+    # Multiply a vector by a constant t
     def __mul__(self, t):
         return Vec3(self.x * t, self.y * t, self.z * t)
 
+    # Multiplication is commutative
+    __rmul__ = __mul__
+    
+    # Divide a vector by a constant t
     def __truediv__(self, t):
         return Vec3(self.x / t, self.y / t, self.z / t)
 
@@ -92,6 +102,7 @@ class Vec3:
         self.__update_coordinates__()
         return self
 
+    # Two Vec3 are equal if their data is equal
     def __eq__(self, other):
         return self.vec == other.vec
     
