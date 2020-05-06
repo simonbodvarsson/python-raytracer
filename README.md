@@ -1,5 +1,5 @@
 # python-raytracer
-A simple ray tracer written in Python
+A simple ray tracer written in Python following this C++ tutorial: https://raytracing.github.io/books/RayTracingInOneWeekend.html
 
 ## Objective:
 Write a simple ray tracer in Python which can be improved and expanded upon.
