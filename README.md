@@ -8,6 +8,7 @@ Write a simple ray tracer in Python which can be improved and expanded upon.
 - Get a simple raytracer to work and output static images of spheres, boxes etc.
 
 **Possible stretch goals**:
+- Add DLSS (Deep Learning Super Sampling)
 - Add compilation to CUDA (e.g. via Numba) to speed up and learn some CUDA.
 - Add UI to view output
 - Add input config to UI
