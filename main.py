@@ -1,19 +1,32 @@
 import sys
+from random import random
 
 from rich.progress import track
 
+from camera import Camera
 from hittable import Sphere
 from hittable_list import HittableList, HitRecord
-from ray import Ray
 from vec3 import Vec3
 
 
 # Note in the tutorial point3 and color are used as aliases for Vec3
 
-def write_color(pixel_color):
-    print(str(int(255.999 * pixel_color.x)) + " " + \
-          str(int(255.999 * pixel_color.y)) + " " + \
-          str(int(255.999 * pixel_color.z)) + " ")
+def write_color(pixel_color, samples_per_pixel):
+    # Divide the color by the number of samples passed through this pixel
+    scale = 1.0 / samples_per_pixel
+
+    r = scale * pixel_color.x
+    g = scale * pixel_color.y
+    b = scale * pixel_color.z
+
+    # Clamp to [0, 0.999]
+    r = max(0, min(r, 0.999))
+    g = max(0, min(g, 0.999))
+    b = max(0, min(b, 0.999))
+
+    print(str(int(256 * r)) + " " + \
+          str(int(256 * g)) + " " + \
+          str(int(256 * b)) + " ")
 
 
 def ray_color(r, world):
@@ -46,44 +59,32 @@ def main():
     aspect_ratio = 16 / 9
     image_width = 384
     image_height = int(image_width // aspect_ratio)
-
-    print("P3")
-    print(str(image_width) + " " + str(image_height) + "\n255")
-
-    # Set height of the viewport to 2 units
-    viewport_height = 2.0
-    viewport_width = aspect_ratio * viewport_height
-    # Set distance from camera center (or eye) to viewport to 1 unit (in Z coordinate).
-    focal_length = 1.0
-
-    # Focal point
-    origin = Vec3(0, 0, 0)
-    horizontal = Vec3(viewport_width, 0, 0)
-    vertical = Vec3(0, viewport_height, 0)
-    lower_left_corner = origin - horizontal / 2 - vertical / 2 - Vec3(0, 0, focal_length)
-    # print("lower_left_corner:", lower_left_corner)
+    samples_per_pixel = 100
 
     world = HittableList()
     world.add(Sphere(Vec3(0, 0, -1), 0.5))
     world.add(Sphere(Vec3(0, -100.5, -1), 100))
 
+    cam = Camera()
+
+    print("P3")
+    print(str(image_width) + " " + str(image_height) + "\n255")
+
     # Iterate through pixels of the output image
+    # Cast a ray through each pixel of the viewport
     for j in track(range(image_height - 1, -1, -1)):
         # print("Scanlines remaining: " + str(j), file=sys.stderr)
         for i in range(0, image_width):
-            # Cast a ray through each pixel of the viewport
-            u = i / (image_width - 1)
-            v = j / (image_height - 1)
 
-            # Why do we need to subtract the origin?
-            r = Ray(origin, lower_left_corner + u * horizontal + v * vertical - origin)
-            # pixel_color = ray_color(r)
+            pixel_color = Vec3(0, 0, 0)
+            for s in range(samples_per_pixel):
+                u = (i + random()) / (image_width - 1)
+                v = (j + random()) / (image_height - 1)
 
-            pixel_color = ray_color(r, world)
+                r = cam.get_ray(u, v)
+                pixel_color += ray_color(r, world)
 
-            write_color(pixel_color)
-
-            # print(str(ir) + " " + str(ig) + " " + str(ib))
+            write_color(pixel_color, samples_per_pixel)
     print("Done", file=sys.stderr)
 
 
