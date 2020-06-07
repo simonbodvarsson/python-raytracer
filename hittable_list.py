@@ -15,7 +15,7 @@ class HittableList:
         hit_anything = False
         closest_so_far = t_max
 
-        temp_rec = HitRecord(None, None, None)
+        temp_rec = HitRecord(None, None, None, None)
         for obj in self.objects:
             if obj.hit(r, t_min, closest_so_far, temp_rec):
                 hit_anything = True
@@ -24,4 +24,5 @@ class HittableList:
                 hit_record.normal = temp_rec.normal
                 hit_record.is_inside = temp_rec.is_inside
                 hit_record.t = temp_rec.t
+                hit_record.material = temp_rec.material
         return hit_anything

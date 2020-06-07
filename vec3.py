@@ -33,6 +33,10 @@ class Vec3:
 
         # Returns a unit vector in direction of this vector
 
+    # Reflect this vector against a surface normal n
+    def reflect(self, n):
+        return self - 2*self.dot(n)*n
+
     def unit_vector(self):
         return self / self.length()
 
@@ -98,7 +102,10 @@ class Vec3:
 
     # Multiply a vector by a constant t
     def __mul__(self, t):
-        return Vec3(self.x * t, self.y * t, self.z * t)
+        if isinstance(t, Vec3):
+            return Vec3(self.x * t.x, self.y * t.y, self.z * t.z)
+        else:
+            return Vec3(self.x * t, self.y * t, self.z * t)
 
     # Multiplication is commutative
     __rmul__ = __mul__

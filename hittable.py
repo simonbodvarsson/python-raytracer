@@ -2,11 +2,12 @@ from abc import ABC
 
 
 class HitRecord:
-    def __init__(self, p, normal, t):
+    def __init__(self, p, normal, t, material):
         self.p = p
         self.normal = normal
         self.is_inside = False
         self.t = t
+        self.material = material
 
 
 # Determine if ray hits inside or outside of Hittable
@@ -27,9 +28,10 @@ class Hittable(ABC):
 
 
 class Sphere(Hittable):
-    def __init__(self, center, radius):
+    def __init__(self, center, radius, material):
         self.center = center
         self.radius = radius
+        self.material = material
 
     def hit(self, r, t_min, t_max, hit_record):
         oc = r.origin - self.center
@@ -49,6 +51,7 @@ class Sphere(Hittable):
                 hit_record.normal = normal
                 hit_record.is_inside = is_inside
                 hit_record.t = t
+                hit_record.material = self.material
                 return True  # incident_point, normal, t
 
             t = (-half_b + root) / a
@@ -60,6 +63,7 @@ class Sphere(Hittable):
                 hit_record.normal = normal
                 hit_record.is_inside = is_inside
                 hit_record.t = t
+                hit_record.material = self.material
                 return True  # incident_point, normal, t
 
         return False

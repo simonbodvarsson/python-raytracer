@@ -2,12 +2,10 @@ import sys
 from math import sqrt
 from random import random
 
-from rich.progress import track
-
 from camera import Camera
 from hittable import Sphere
 from hittable_list import HittableList, HitRecord
-from ray import Ray
+from material import Lambertian, Metal
 from vec3 import Vec3
 
 
@@ -41,11 +39,17 @@ def ray_color(r, world, depth):
     if depth <= 0:
         return Vec3(0, 0, 0)
 
-    rec = HitRecord(None, None, None)
+    rec = HitRecord(None, None, None, None)
     if world.hit(r, 0.001, float('inf'), rec):
-        # target = rec.p + rec.normal + Vec3.random_unit_vector()
-        target = rec.p + rec.normal + Vec3.random_in_hemisphere(rec.normal)
-        return 0.5 * ray_color(Ray(rec.p, target - rec.p), world, depth - 1)
+        did_scatter, scattered, attenuation = rec.material.scatter(r, rec)
+        if did_scatter:
+            # print("attenuation", attenuation)
+            # print('scattered', scattered)
+            return attenuation * ray_color(scattered, world, depth - 1)
+        return Vec3(0, 0, 0)
+        # # target = rec.p + rec.normal + Vec3.random_unit_vector()
+        # target = rec.p + rec.normal + Vec3.random_in_hemisphere(rec.normal)
+        # return 0.5 * ray_color(Ray(rec.p, target - rec.p), world, depth - 1)
 
     unit_direction = r.dir.unit_vector()
     # Since unit length: -1.0 <= y <= 1.0
@@ -70,14 +74,24 @@ def hit_sphere(center, radius, r):
 
 def main():
     aspect_ratio = 16 / 9
-    image_width = 384  # 384
+    image_width = 800  # 384
     image_height = int(image_width // aspect_ratio)
-    samples_per_pixel = 20
-    max_depth = 20
+    samples_per_pixel = 250  # 20
+    max_depth = 200  # 20
 
     world = HittableList()
-    world.add(Sphere(Vec3(0, 0, -1), 0.5))
-    world.add(Sphere(Vec3(0, -100.5, -1), 100))
+    # world.add(Sphere(Vec3(0, 0, -1), 0.5, Lambertian(Vec3(0.7, 0.3, 0.3))))
+    world.add(Sphere(Vec3(0, 0, -1.5), 0.5, Lambertian(Vec3(0.2, 0.8, 0.3))))
+    world.add(Sphere(Vec3(0, -100.5, -1), 100, Lambertian(Vec3(0.8, 0.8, 0.0))))
+
+    # world.add(Sphere(Vec3(1, 0, -1), 0.5, Metal(Vec3(.8, .6, .2))))
+    # world.add(Sphere(Vec3(-1, 0, -1), 0.5, Metal(Vec3(.8, .8, .8))))
+
+    world.add(Sphere(Vec3(1, 0, -1.5), 0.5, Metal(Vec3(.8, .6, .2))))
+    world.add(Sphere(Vec3(-1, 0, -1.5), 0.5, Metal(Vec3(.8, .8, .8))))
+
+    world.add(Sphere(Vec3(2, 0, -1.5), 0.5, Metal(Vec3(.2, .6, .2), fuzz=0.3)))
+    world.add(Sphere(Vec3(-2, 0, -1.5), 0.5, Metal(Vec3(.8, .3, .8), fuzz=0.1)))
 
     cam = Camera()
 
@@ -86,7 +100,7 @@ def main():
 
     # Iterate through pixels of the output image
     # Cast a ray through each pixel of the viewport
-    for j in track(range(image_height - 1, -1, -1)):
+    for j in range(image_height - 1, -1, -1):
         print("Scanlines remaining: " + str(j), end="\r", file=sys.stderr)
         for i in range(0, image_width):
 
@@ -99,7 +113,7 @@ def main():
                 pixel_color += ray_color(r, world, max_depth)
 
             write_color(pixel_color, samples_per_pixel)
-    print("Done", file=sys.stderr)
+    print("\nDone", file=sys.stderr)
 
 
 if __name__ == '__main__':
