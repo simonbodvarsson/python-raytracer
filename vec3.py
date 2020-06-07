@@ -1,7 +1,11 @@
 # vec3 is a 3d vector and can hold 3d coordinates, color etc.
+import math
+from random import random
+
+
 class Vec3:
     def __init__(self, x, y, z):
-        self.vec = (x,y,z)
+        self.vec = (x, y, z)
         self.__update_coordinates__()
 
     # Helper function to update x, y, z values
@@ -11,10 +15,10 @@ class Vec3:
         self.z = self.vec[2]
 
     def length(self):
-        return self.length_squared()**(0.5)
+        return self.length_squared() ** (0.5)
 
     def length_squared(self):
-        return self.x**2 + self.y**2 + self.z**2
+        return self.x ** 2 + self.y ** 2 + self.z ** 2
 
     # Return the dot product of this vector and vector v
     def dot(self, v):
@@ -25,11 +29,53 @@ class Vec3:
         coord = (self.y * v.z - self.z * v.y,
                  self.z * v.x - self.x * v.z,
                  self.x * v.y - self.y * v.x)
-        return Vec3(*coord) 
+        return Vec3(*coord)
 
-    # Returns a unit vector in direction of this vector
+        # Returns a unit vector in direction of this vector
+
     def unit_vector(self):
         return self / self.length()
+
+    # Create a new random Vec3
+    @staticmethod
+    def random(minimum=None, maximum=None):
+        # If a range is given, both minimum and maximum must be given.
+        assert (minimum is None and maximum is None) or (minimum is not None and maximum is not None)
+
+        # If no range is given, generate a vec3 with coordinates in the range [0,1]
+        if minimum is None and maximum is None:
+            return Vec3(random(), random(), random())
+        else:
+            x = minimum + (maximum - minimum) * random()
+            y = minimum + (maximum - minimum) * random()
+            z = minimum + (maximum - minimum) * random()
+            return Vec3(x, y, z)
+
+    # Generate a random point in the unit sphere
+    @staticmethod
+    def random_in_unit_sphere():
+        # Use a rejection method, generate random coordinates in range [0,1] a point in the unit sphere is found.
+        while True:
+            point = Vec3.random(minimum=-1, maximum=1)
+            if point.length_squared() < 1:
+                return point
+
+    # Generate a random point in the unit sphere with Lambertian distribution.
+    @staticmethod
+    def random_unit_vector():
+        a = random() * 2*math.pi
+        z = -1 + (1 + 1) * random()
+        r = math.sqrt(1 - z**2)
+        return Vec3(r*math.cos(a), r*math.sin(a), z)
+
+    # Hemispherical scattering
+    @staticmethod
+    def random_in_hemisphere(normal):
+        in_unit_sphere = Vec3.random_in_unit_sphere()
+        if in_unit_sphere.dot(normal) > 0.0: # In the same hemisphere as the normal
+            return in_unit_sphere
+        else:
+            return -in_unit_sphere
 
     # Overload operators +, -, [], +=, -=, *=, /=
 
@@ -38,7 +84,7 @@ class Vec3:
         # If argument is not of type Vec3, try adding it to each coordinate
         if not isinstance(other, Vec3):
             return Vec3(self.x + other, self.y + other, self.z + other)
-        return Vec3(self.x+other.x, self.y+other.y, self.z+other.z)
+        return Vec3(self.x + other.x, self.y + other.y, self.z + other.z)
 
     # Adding is commutative
     __radd__ = __add__
@@ -48,7 +94,7 @@ class Vec3:
         # If argument is not of type Vec3, try subtracting it from each coordinate
         if not isinstance(other, Vec3):
             return Vec3(self.x - other, self.y - other, self.z - other)
-        return Vec3(self.x-other.x, self.y-other.y, self.z-other.z)
+        return Vec3(self.x - other.x, self.y - other.y, self.z - other.z)
 
     # Multiply a vector by a constant t
     def __mul__(self, t):
@@ -56,7 +102,7 @@ class Vec3:
 
     # Multiplication is commutative
     __rmul__ = __mul__
-    
+
     # Divide a vector by a constant t
     def __truediv__(self, t):
         return Vec3(self.x / t, self.y / t, self.z / t)
@@ -68,23 +114,23 @@ class Vec3:
     # Index vector
     def __getitem__(self, index):
         return self.vec[index]
-    
+
     # Add a vector or constant to this vector (override +=)
     def __iadd__(self, other):
         # If argument is not of type Vec3, try adding it to each coordinate
         if not isinstance(other, Vec3):
-            self.vec = (self.x+other, self.y+other, self.z+other)
+            self.vec = (self.x + other, self.y + other, self.z + other)
         else:
-            self.vec = (self.x+other.x, self.y+other.y, self.z+other.z)
+            self.vec = (self.x + other.x, self.y + other.y, self.z + other.z)
         self.__update_coordinates__()
         return self
 
     # Subtract a vector or constant from this vector (override -=)
     def __isub__(self, other):
         if not isinstance(other, Vec3):
-            self.vec = (self.x-other, self.y-other, self.z-other)
+            self.vec = (self.x - other, self.y - other, self.z - other)
         else:
-            self.vec = (self.x-other.x, self.y-other.y, self.z-other.z)
+            self.vec = (self.x - other.x, self.y - other.y, self.z - other.z)
         self.__update_coordinates__()
         return self
 
@@ -105,7 +151,7 @@ class Vec3:
     # Two Vec3 are equal if their data is equal
     def __eq__(self, other):
         return self.vec == other.vec
-    
+
     # Overload str()
     def __str__(self):
         return str(self.vec)

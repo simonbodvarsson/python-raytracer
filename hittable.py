@@ -55,7 +55,7 @@ class Sphere(Hittable):
             if t_max > t > t_min:
                 incident_point = r.at(t)
                 outward_normal = (incident_point - self.center) / self.radius
-                normal, is_inside = front_face(r, outward_normal)
+                normal, is_inside = front_face(r.dir, outward_normal)
                 hit_record.p = incident_point
                 hit_record.normal = normal
                 hit_record.is_inside = is_inside

@@ -1,4 +1,5 @@
 import sys
+from math import sqrt
 from random import random
 
 from rich.progress import track
@@ -6,6 +7,7 @@ from rich.progress import track
 from camera import Camera
 from hittable import Sphere
 from hittable_list import HittableList, HitRecord
+from ray import Ray
 from vec3 import Vec3
 
 
@@ -19,20 +21,31 @@ def write_color(pixel_color, samples_per_pixel):
     g = scale * pixel_color.y
     b = scale * pixel_color.z
 
+    # gamma-correct  for gamma = 2.0
+    r = sqrt(r)
+    g = sqrt(g)
+    b = sqrt(b)
+
     # Clamp to [0, 0.999]
     r = max(0, min(r, 0.999))
     g = max(0, min(g, 0.999))
     b = max(0, min(b, 0.999))
 
-    print(str(int(256 * r)) + " " + \
-          str(int(256 * g)) + " " + \
+    print(str(int(256 * r)) + " " +
+          str(int(256 * g)) + " " +
           str(int(256 * b)) + " ")
 
 
-def ray_color(r, world):
+def ray_color(r, world, depth):
+    # Check if max depth of recursion is exceeded.
+    if depth <= 0:
+        return Vec3(0, 0, 0)
+
     rec = HitRecord(None, None, None)
-    if world.hit(r, 0, float('inf'), rec):
-        return 0.5 * (rec.normal + Vec3(1, 1, 1))
+    if world.hit(r, 0.001, float('inf'), rec):
+        # target = rec.p + rec.normal + Vec3.random_unit_vector()
+        target = rec.p + rec.normal + Vec3.random_in_hemisphere(rec.normal)
+        return 0.5 * ray_color(Ray(rec.p, target - rec.p), world, depth - 1)
 
     unit_direction = r.dir.unit_vector()
     # Since unit length: -1.0 <= y <= 1.0
@@ -57,9 +70,10 @@ def hit_sphere(center, radius, r):
 
 def main():
     aspect_ratio = 16 / 9
-    image_width = 384
+    image_width = 384  # 384
     image_height = int(image_width // aspect_ratio)
-    samples_per_pixel = 100
+    samples_per_pixel = 20
+    max_depth = 20
 
     world = HittableList()
     world.add(Sphere(Vec3(0, 0, -1), 0.5))
@@ -73,7 +87,7 @@ def main():
     # Iterate through pixels of the output image
     # Cast a ray through each pixel of the viewport
     for j in track(range(image_height - 1, -1, -1)):
-        # print("Scanlines remaining: " + str(j), file=sys.stderr)
+        print("Scanlines remaining: " + str(j), end="\r", file=sys.stderr)
         for i in range(0, image_width):
 
             pixel_color = Vec3(0, 0, 0)
@@ -82,7 +96,7 @@ def main():
                 v = (j + random()) / (image_height - 1)
 
                 r = cam.get_ray(u, v)
-                pixel_color += ray_color(r, world)
+                pixel_color += ray_color(r, world, max_depth)
 
             write_color(pixel_color, samples_per_pixel)
     print("Done", file=sys.stderr)
