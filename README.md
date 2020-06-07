@@ -1,7 +1,7 @@
 # python-raytracer
 A simple ray tracer written in Python following this C++ tutorial: https://raytracing.github.io/books/RayTracingInOneWeekend.html
 
-![current output](img.ppm)
+![current output](./img.png?raw=true "Output")
 
 ## Objective:
 Write a simple ray tracer in Python which can be improved and expanded upon.
