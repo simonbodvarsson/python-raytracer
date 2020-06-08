@@ -81,6 +81,12 @@ class Vec3:
         else:
             return -in_unit_sphere
 
+    def refract(self, n, refraction_ratio):
+        cos_theta = (-1*self.unit_vector()).dot(n)
+        r_out_parallel = refraction_ratio * (self + cos_theta*n)
+        r_out_perp = -math.sqrt(1.0 - r_out_parallel.length_squared()) * n
+        return r_out_parallel + r_out_perp
+
     # Overload operators +, -, [], +=, -=, *=, /=
 
     # Sum vectors or add constant to vector
@@ -112,7 +118,10 @@ class Vec3:
 
     # Divide a vector by a constant t
     def __truediv__(self, t):
-        return Vec3(self.x / t, self.y / t, self.z / t)
+        if isinstance(t, Vec3):
+            return Vec3(self.x / t.x, self.y / t.y, self.z / t.z)
+        else:
+            return Vec3(self.x / t, self.y / t, self.z / t)
 
     # Negate vector
     def __neg__(self):

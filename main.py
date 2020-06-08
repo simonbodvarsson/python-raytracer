@@ -5,7 +5,7 @@ from random import random
 from camera import Camera
 from hittable import Sphere
 from hittable_list import HittableList, HitRecord
-from material import Lambertian, Metal
+from material import Lambertian, Metal, Dielectric
 from vec3 import Vec3
 
 
@@ -76,8 +76,8 @@ def main():
     aspect_ratio = 16 / 9
     image_width = 800  # 384
     image_height = int(image_width // aspect_ratio)
-    samples_per_pixel = 250  # 20
-    max_depth = 200  # 20
+    samples_per_pixel = 100  # 20
+    max_depth = 100  # 20
 
     world = HittableList()
     # world.add(Sphere(Vec3(0, 0, -1), 0.5, Lambertian(Vec3(0.7, 0.3, 0.3))))
@@ -88,10 +88,14 @@ def main():
     # world.add(Sphere(Vec3(-1, 0, -1), 0.5, Metal(Vec3(.8, .8, .8))))
 
     world.add(Sphere(Vec3(1, 0, -1.5), 0.5, Metal(Vec3(.8, .6, .2))))
-    world.add(Sphere(Vec3(-1, 0, -1.5), 0.5, Metal(Vec3(.8, .8, .8))))
+    world.add(Sphere(Vec3(-1, 0, -1.5), 0.5, Metal(Vec3(.8, .8, .8), fuzz=0.3)))
 
-    world.add(Sphere(Vec3(2, 0, -1.5), 0.5, Metal(Vec3(.2, .6, .2), fuzz=0.3)))
-    world.add(Sphere(Vec3(-2, 0, -1.5), 0.5, Metal(Vec3(.8, .3, .8), fuzz=0.1)))
+    # Hollow glass sphere
+    world.add(Sphere(Vec3(2, 0, -1.5), 0.5, Dielectric(1.5)))
+    world.add(Sphere(Vec3(2, 0, -1.5), -0.45, Dielectric(1.5)))
+
+    # Glass sphere
+    world.add(Sphere(Vec3(-2, 0, -1.5), 0.5, Dielectric(1.5)))
 
     cam = Camera()
 
