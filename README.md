@@ -2,6 +2,7 @@
 A ray tracer written in Python based on this [C++ tutorial](https://raytracing.github.io/books/RayTracingInOneWeekend.html).   
 
 ![Randomly generated scene of spheres.](./img.png?raw=true "Output")
+
 A randomly generated scene of spheres of different materials: diffuse, glass and metal.
 
 ## Objective:
