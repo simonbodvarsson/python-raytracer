@@ -1,22 +1,42 @@
 # python-raytracer
-A simple ray tracer written in Python following this C++ tutorial: https://raytracing.github.io/books/RayTracingInOneWeekend.html
+A ray tracer written in Python based on this [C++ tutorial](https://raytracing.github.io/books/RayTracingInOneWeekend.html).   
 
-![current output](./img.png?raw=true "Output")
+![Randomly generated scene of spheres.](./img.png?raw=true "Output")
+A randomly generated scene of spheres of different materials: diffuse, glass and metal.
 
 ## Objective:
 Write a simple ray tracer in Python which can be improved and expanded upon.
 
-**Initial goal**:
-- Get a simple raytracer to work and output static images of spheres, boxes etc.
+**Current Status**
+- Simple unit tested ray tracer.
+- One type of hittable object: Sphere.
+- Three different materials: Diffuse, Glass and Metal.
+- Anti-aliasing via sub-pixel sampling.
+- Positionable Camera.
+- Defocus Blur (aka. Depth of Field).
+- Randomly generated scene of spheres.
 
-**Possible stretch goals**:
+**Next Steps**
+- Add multiprocessing.
+- Reorder ray casting to improve intermediate output.
+- Add more object types.
+- Add lights.
+- Add textures.
+
+**Possible stretch goals**
 - Add DLSS (Deep Learning Super Sampling)
-- Add compilation to CUDA (e.g. via Numba) to speed up and learn some CUDA.
+- Add compilation to CUDA via Numba.
 - Add UI to view output
 - Add input config to UI
-- Real time rendering: View the result as it is being built.
 - Allow for adjusting viewpoint in real time.
-- File parser: Support importing files with more complicated objects
 - Support different textures: Glossy, matte etc.
-- View in browser as a web-app
 - Planet/Terrain procedural generation
+
+**Test Coverage**
+
+Unit Test coverage is currently at 61%. This is neglected for now to develop faster.
+
+To discover and run all unit tests: `coverage run -m unittest discover`
+
+To generate HTML test report: `coverage html`
+

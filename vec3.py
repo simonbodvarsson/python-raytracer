@@ -1,8 +1,6 @@
 # vec3 is a 3d vector and can hold 3d coordinates, color etc.
 import math
-from random import random
-
-
+import random
 class Vec3:
     def __init__(self, x, y, z):
         self.vec = (x, y, z)
@@ -35,7 +33,7 @@ class Vec3:
 
     # Reflect this vector against a surface normal n
     def reflect(self, n):
-        return self - 2*self.dot(n)*n
+        return self - 2 * self.dot(n) * n
 
     def unit_vector(self):
         return self / self.length()
@@ -48,11 +46,11 @@ class Vec3:
 
         # If no range is given, generate a vec3 with coordinates in the range [0,1]
         if minimum is None and maximum is None:
-            return Vec3(random(), random(), random())
+            return Vec3(random.random(), random.random(), random.random())
         else:
-            x = minimum + (maximum - minimum) * random()
-            y = minimum + (maximum - minimum) * random()
-            z = minimum + (maximum - minimum) * random()
+            x = minimum + (maximum - minimum) * random.random()
+            y = minimum + (maximum - minimum) * random.random()
+            z = minimum + (maximum - minimum) * random.random()
             return Vec3(x, y, z)
 
     # Generate a random point in the unit sphere
@@ -67,23 +65,30 @@ class Vec3:
     # Generate a random point in the unit sphere with Lambertian distribution.
     @staticmethod
     def random_unit_vector():
-        a = random() * 2*math.pi
-        z = -1 + (1 + 1) * random()
-        r = math.sqrt(1 - z**2)
-        return Vec3(r*math.cos(a), r*math.sin(a), z)
+        a = random.random() * 2 * math.pi
+        z = -1 + (1 + 1) * random.random()
+        r = math.sqrt(1 - z ** 2)
+        return Vec3(r * math.cos(a), r * math.sin(a), z)
 
     # Hemispherical scattering
     @staticmethod
     def random_in_hemisphere(normal):
         in_unit_sphere = Vec3.random_in_unit_sphere()
-        if in_unit_sphere.dot(normal) > 0.0: # In the same hemisphere as the normal
+        if in_unit_sphere.dot(normal) > 0.0:  # In the same hemisphere as the normal
             return in_unit_sphere
         else:
             return -in_unit_sphere
 
+    @staticmethod
+    def random_in_unit_disk():
+        while True:
+            p = Vec3(random.uniform(-1, 1), random.uniform(-1, 1), 0)
+            if p.length_squared() < 1:
+                return p
+
     def refract(self, n, refraction_ratio):
-        cos_theta = (-1*self.unit_vector()).dot(n)
-        r_out_parallel = refraction_ratio * (self + cos_theta*n)
+        cos_theta = (-1 * self.unit_vector()).dot(n)
+        r_out_parallel = refraction_ratio * (self + cos_theta * n)
         r_out_perp = -math.sqrt(1.0 - r_out_parallel.length_squared()) * n
         return r_out_parallel + r_out_perp
 

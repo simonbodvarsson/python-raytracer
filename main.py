@@ -1,6 +1,7 @@
+import math
 import sys
 from math import sqrt
-from random import random
+from random import random, uniform
 
 from camera import Camera
 from hittable import Sphere
@@ -72,32 +73,81 @@ def hit_sphere(center, radius, r):
         return (-half_b - discriminant ** 0.5) / a
 
 
+def random_scene():
+    ground_material = Lambertian(Vec3(0.5, 0.5, 0.5))
+    world = HittableList()
+    world.add(Sphere(Vec3(0, -1000, 0), 1000, ground_material))
+
+    for a in range(-7, 7):
+        for b in range(-7, 7):
+            choose_material = random()
+            center = Vec3(a + 0.9 * random(), 0.2, b + 0.9 * random())
+
+            if (center - Vec3(4, 0.2, 0)).length() > 0.9:
+                if choose_material < 0.8:
+                    # Diffuse material
+                    albedo = Vec3.random()
+                    sphere_material = Lambertian(albedo)
+                    world.add(Sphere(center, 0.2, sphere_material))
+                elif choose_material < 0.95:
+                    # Metallic material
+                    albedo = uniform(0.5, 1)
+                    fuzz = uniform(0, 0.5)
+                    sphere_material = Metal(albedo, fuzz=fuzz)
+                    world.add(Sphere(center, 0.2, sphere_material))
+                else:
+                    # Glass
+                    sphere_material = Dielectric(1.5)
+                    world.add(Sphere(center, 0.2, sphere_material))
+    mat1 = Dielectric(1.5)
+    world.add(Sphere(Vec3(0, 1, 0), 1.0, mat1))
+
+    mat2 = Lambertian(Vec3(0.4, 0.2, 0.1))
+    world.add(Sphere(Vec3(-4, 1, 0), 1.0, mat2))
+
+    mat3 = Metal(Vec3(0.7, 0.6, 0.5), 0.0)
+    world.add(Sphere(Vec3(4, 1, 0), 1.0, mat3))
+    return world
+
+
 def main():
     aspect_ratio = 16 / 9
     image_width = 800  # 384
     image_height = int(image_width // aspect_ratio)
-    samples_per_pixel = 100  # 20
-    max_depth = 100  # 20
+    samples_per_pixel = 30  # 20
+    max_depth = 5  # 20
 
-    world = HittableList()
-    # world.add(Sphere(Vec3(0, 0, -1), 0.5, Lambertian(Vec3(0.7, 0.3, 0.3))))
-    world.add(Sphere(Vec3(0, 0, -1.5), 0.5, Lambertian(Vec3(0.2, 0.8, 0.3))))
-    world.add(Sphere(Vec3(0, -100.5, -1), 100, Lambertian(Vec3(0.8, 0.8, 0.0))))
+    world = random_scene()
 
-    # world.add(Sphere(Vec3(1, 0, -1), 0.5, Metal(Vec3(.8, .6, .2))))
-    # world.add(Sphere(Vec3(-1, 0, -1), 0.5, Metal(Vec3(.8, .8, .8))))
+    # world = HittableList()
+    # # R = math.cos(math.pi / 4)
+    # # world.add(Sphere(Vec3(-R, 0, -1), R, Lambertian(Vec3(0, 0, 1))))
+    # # world.add(Sphere(Vec3(R, 0, -1), R, Lambertian(Vec3(1, 0, 0))))
+    #
+    # # Lambertian red sphere
+    # world.add(Sphere(Vec3(0, 0, -1.5), 0.5, Lambertian(Vec3(0.7, 0.3, 0.3))))
+    #
+    # # Metal spheres
+    # # world.add(Sphere(Vec3(0, 0, -1.5), 0.5, Lambertian(Vec3(0.2, 0.8, 0.3))))
+    #
+    # # Lambertian "ground"
+    # world.add(Sphere(Vec3(0, -100.5, -1), 100, Lambertian(Vec3(0.8, 0.8, 0.0))))
+    #
+    # # world.add(Sphere(Vec3(1, 0, -1), 0.5, Metal(Vec3(.8, .6, .2))))
+    # # world.add(Sphere(Vec3(-1, 0, -1), 0.5, Metal(Vec3(.8, .8, .8))))
+    #
+    # world.add(Sphere(Vec3(1, 0, -1.5), 0.5, Metal(Vec3(.8, .6, .2))))
+    # world.add(Sphere(Vec3(-1, 0, -1.5), 0.5, Metal(Vec3(.8, .8, .8), fuzz=0.3)))
+    #
+    # # Hollow glass sphere
+    # world.add(Sphere(Vec3(2, 0, -1.5), 0.5, Dielectric(1.5)))
+    # world.add(Sphere(Vec3(2, 0, -1.5), -0.45, Dielectric(1.5)))
+    #
+    # # Glass sphere
+    # world.add(Sphere(Vec3(-2, 0, -1.5), 0.5, Dielectric(1.5)))
 
-    world.add(Sphere(Vec3(1, 0, -1.5), 0.5, Metal(Vec3(.8, .6, .2))))
-    world.add(Sphere(Vec3(-1, 0, -1.5), 0.5, Metal(Vec3(.8, .8, .8), fuzz=0.3)))
-
-    # Hollow glass sphere
-    world.add(Sphere(Vec3(2, 0, -1.5), 0.5, Dielectric(1.5)))
-    world.add(Sphere(Vec3(2, 0, -1.5), -0.45, Dielectric(1.5)))
-
-    # Glass sphere
-    world.add(Sphere(Vec3(-2, 0, -1.5), 0.5, Dielectric(1.5)))
-
-    cam = Camera()
+    cam = Camera(vfov=20, look_from=Vec3(13, 2, 3), look_at=Vec3(0, 0, 0), view_up=Vec3(0, 1, 0), aperture=0.1,
+                 focus_dist=10)
 
     print("P3")
     print(str(image_width) + " " + str(image_height) + "\n255")
