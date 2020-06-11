@@ -1,7 +1,14 @@
-import math
 import sys
+import time
+
+import matplotlib.pyplot as plt
+import numpy as np
+
 from math import sqrt
+from multiprocessing import Pool, Queue
 from random import random, uniform
+
+import tqdm as tqdm
 
 from camera import Camera
 from hittable import Sphere
@@ -30,9 +37,7 @@ def write_color(pixel_color, samples_per_pixel):
     g = max(0, min(g, 0.999))
     b = max(0, min(b, 0.999))
 
-    print(str(int(256 * r)) + " " +
-          str(int(256 * g)) + " " +
-          str(int(256 * b)) + " ")
+    return [int(256 * r), int(256 * g), int(256 * b)]
 
 
 def ray_color(r, world, depth):
@@ -110,64 +115,49 @@ def random_scene():
     return world
 
 
+def cast_ray(image_width, image_height, world, cam, max_depth):
+    res = np.zeros((image_height, image_width, 3), dtype=int)
+    # Iterate through pixels of the output image
+    # Cast a ray through each pixel of the viewport
+
+    for j in range(image_height):  # - 1, -1, -1):
+        # print("Scanlines remaining: " + str(j), end="\r", file=sys.stderr)
+        for i in range(image_width):
+            pixel_color = Vec3(0, 0, 0)
+            u = (i + random()) / (image_width - 1)
+            v = (j + random()) / (image_height - 1)
+
+            r = cam.get_ray(u, v)
+            pixel_color += ray_color(r, world, max_depth)
+
+            res[image_height - 1 - j, i] = write_color(pixel_color, 1)
+    return res
+
+
 def main():
+    start = time.time()
     aspect_ratio = 16 / 9
-    image_width = 800  # 384
+    image_width = 400
     image_height = int(image_width // aspect_ratio)
-    samples_per_pixel = 30  # 20
-    max_depth = 5  # 20
+    samples_per_pixel = 16  # 20
+    max_depth = 10  # 20
 
     world = random_scene()
-
-    # world = HittableList()
-    # # R = math.cos(math.pi / 4)
-    # # world.add(Sphere(Vec3(-R, 0, -1), R, Lambertian(Vec3(0, 0, 1))))
-    # # world.add(Sphere(Vec3(R, 0, -1), R, Lambertian(Vec3(1, 0, 0))))
-    #
-    # # Lambertian red sphere
-    # world.add(Sphere(Vec3(0, 0, -1.5), 0.5, Lambertian(Vec3(0.7, 0.3, 0.3))))
-    #
-    # # Metal spheres
-    # # world.add(Sphere(Vec3(0, 0, -1.5), 0.5, Lambertian(Vec3(0.2, 0.8, 0.3))))
-    #
-    # # Lambertian "ground"
-    # world.add(Sphere(Vec3(0, -100.5, -1), 100, Lambertian(Vec3(0.8, 0.8, 0.0))))
-    #
-    # # world.add(Sphere(Vec3(1, 0, -1), 0.5, Metal(Vec3(.8, .6, .2))))
-    # # world.add(Sphere(Vec3(-1, 0, -1), 0.5, Metal(Vec3(.8, .8, .8))))
-    #
-    # world.add(Sphere(Vec3(1, 0, -1.5), 0.5, Metal(Vec3(.8, .6, .2))))
-    # world.add(Sphere(Vec3(-1, 0, -1.5), 0.5, Metal(Vec3(.8, .8, .8), fuzz=0.3)))
-    #
-    # # Hollow glass sphere
-    # world.add(Sphere(Vec3(2, 0, -1.5), 0.5, Dielectric(1.5)))
-    # world.add(Sphere(Vec3(2, 0, -1.5), -0.45, Dielectric(1.5)))
-    #
-    # # Glass sphere
-    # world.add(Sphere(Vec3(-2, 0, -1.5), 0.5, Dielectric(1.5)))
 
     cam = Camera(vfov=20, look_from=Vec3(13, 2, 3), look_at=Vec3(0, 0, 0), view_up=Vec3(0, 1, 0), aperture=0.1,
                  focus_dist=10)
 
-    print("P3")
-    print(str(image_width) + " " + str(image_height) + "\n255")
+    pbar = tqdm.tqdm(total=samples_per_pixel)
+    with Pool() as pool:
+        pool_results = [pool.apply_async(cast_ray, args=(image_width, image_height, world, cam, max_depth),
+                                         callback=lambda _: pbar.update(1))
+                        for _ in range(samples_per_pixel)]
+        output = [p.get() for p in pool_results]
 
-    # Iterate through pixels of the output image
-    # Cast a ray through each pixel of the viewport
-    for j in range(image_height - 1, -1, -1):
-        print("Scanlines remaining: " + str(j), end="\r", file=sys.stderr)
-        for i in range(0, image_width):
-
-            pixel_color = Vec3(0, 0, 0)
-            for s in range(samples_per_pixel):
-                u = (i + random()) / (image_width - 1)
-                v = (j + random()) / (image_height - 1)
-
-                r = cam.get_ray(u, v)
-                pixel_color += ray_color(r, world, max_depth)
-
-            write_color(pixel_color, samples_per_pixel)
-    print("\nDone", file=sys.stderr)
+    img = (np.sum(output, axis=0) // samples_per_pixel).astype('uint8')
+    plt.imsave('out.png', img)
+    end = time.time()
+    print("time: %.2f seconds" % (end - start))
 
 
 if __name__ == '__main__':

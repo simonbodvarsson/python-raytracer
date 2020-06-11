@@ -1,7 +1,7 @@
 # python-raytracer
 A ray tracer written in Python based on this [C++ tutorial](https://raytracing.github.io/books/RayTracingInOneWeekend.html).   
 
-![Randomly generated scene of spheres.](./img.png?raw=true "Output")
+![Randomly generated scene of spheres.](./example.png?raw=true "Output")
 
 A randomly generated scene of spheres of different materials: diffuse, glass and metal.
 
@@ -16,10 +16,10 @@ Write a simple ray tracer in Python which can be improved and expanded upon.
 - Positionable Camera.
 - Defocus Blur (aka. Depth of Field).
 - Randomly generated scene of spheres.
+- Parallelized with multiprocessing.
 
 **Next Steps**
-- Add multiprocessing.
-- Reorder ray casting to improve intermediate output.
+- Output intermediate results.
 - Add more object types.
 - Add lights.
 - Add textures.
